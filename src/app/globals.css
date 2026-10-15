@@ -1,26 +1,181 @@
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  --background: #09090b;
+  --surface: #18181b;
+  --border: #27272a;
+  --foreground: #fafafa;
+  --muted: #a1a1aa;
+  --accent: #10b981;
+  --accent-foreground: #09090b;
+  --timer: #f97316;
+  --timer-foreground: #09090b;
+  --touch: 48px;
+  --radius-card: 1rem;
+  --nav-height: 4.75rem;
+  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.04) inset;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-timer: var(--timer);
+  --color-timer-foreground: var(--timer-foreground);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --radius-card: 1rem;
+  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.04) inset;
+  --min-height-touch: var(--touch);
+  --min-width-touch: var(--touch);
+  --spacing-nav: var(--nav-height);
+  --spacing-safe-b: env(safe-area-inset-bottom, 0px);
+  --breakpoint-xs: 320px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  body {
+    min-height: 100dvh;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--foreground);
+    letter-spacing: -0.025em;
+    font-weight: 600;
+  }
+
+  p,
+  .description {
+    color: var(--muted);
+  }
+
+  button,
+  a,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    min-height: var(--touch);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility pb-nav {
+  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+}
+
+@utility touch-target {
+  min-height: var(--touch);
+  min-width: var(--touch);
+}
+
+@layer components {
+  .dw-app {
+    align-self: center;
+    margin-inline: auto;
+    width: 100%;
+    max-width: 32rem;
+    min-height: 100dvh;
+  }
+
+  .dw-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .dw-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: var(--touch);
+    min-width: var(--touch);
+    padding-inline: 1.25rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    transition: opacity 150ms ease, transform 150ms ease;
+  }
+
+  .dw-btn:active {
+    transform: scale(0.98);
+  }
+
+  .dw-btn-primary {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  .dw-btn-secondary {
+    background: transparent;
+    color: var(--foreground);
+    border: 1px solid var(--border);
+  }
+
+  .dw-btn-timer {
+    background: var(--timer);
+    color: var(--timer-foreground);
+  }
+
+  .dw-nav {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 40;
+    display: grid;
+    width: 100%;
+    max-width: 32rem;
+    min-height: var(--nav-height);
+    margin-inline: auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: color-mix(in srgb, var(--background) 92%, transparent);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+
+  .dw-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    min-height: var(--touch);
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .dw-nav-item[aria-current="page"] {
+    color: var(--accent);
+  }
 }
