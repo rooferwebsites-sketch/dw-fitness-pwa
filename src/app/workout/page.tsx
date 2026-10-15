@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/client'
-import Navigation from '@/app/components/Navigation'
+import Navigation from '@/components/Navigation'
 
 interface Exercise {
   name: string
