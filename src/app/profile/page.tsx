@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/client'
 import Navigation from '@/components/Navigation'
+import { User } from '@supabase/supabase-js'
 
 export default function ProfilePage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [isSignUp, setIsSignUp] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -69,7 +70,7 @@ export default function ProfilePage() {
       {user ? (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center space-y-4 shadow-lg">
           <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
-            {user.email?.[0].toUpperCase()}
+            {user.email?.[0]?.toUpperCase() || 'U'}
           </div>
           <div>
             <p className="text-xs text-slate-400">Logged in as:</p>
