@@ -1,89 +1,151 @@
-'use client';
+'use client'
 
-import Navigation from '@/components/Navigation';
-import { User, ShieldCheck, Check, Globe } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/client'
+import Navigation from '@/components/Navigation'
 
 export default function ProfilePage() {
-  const [equipment, setEquipment] = useState(['Gloves', 'Wraps', 'Jump Rope']);
+  const supabase = createClient()
+  const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [user, setUser] = useState<any>(null)
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [message, setMessage] = useState('')
 
-  const availableEquip = ['Gloves', 'Wraps', 'Jump Rope', 'Dumbbells', 'Kettlebell', 'Mat'];
+  useEffect(() => {
+    checkUser()
+  }, [])
 
-  const toggleGear = (item: string) => {
-    if (equipment.includes(item)) {
-      setEquipment(equipment.filter((g) => g !== item));
-    } else {
-      setEquipment([...equipment, item]);
+  async function checkUser() {
+    const { data } = await supabase.auth.getUser()
+    if (data?.user) {
+      setUser(data.user)
     }
-  };
+  }
+
+  async function handleAuth(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setMessage('')
+
+    if (isSignUp) {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      })
+      if (error) {
+        setMessage(`Error: ${error.message}`)
+      } else if (data.user) {
+        setMessage('Account created! Logging you in...')
+        setUser(data.user)
+      }
+    } else {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (error) {
+        setMessage(`Error: ${error.message}`)
+      } else if (data.user) {
+        setUser(data.user)
+      }
+    }
+    setLoading(false)
+  }
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    setUser(null)
+    setMessage('Logged out successfully.')
+  }
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-50 pb-28 pt-6 px-4 max-w-md mx-auto relative">
-      <header className="mb-6">
-        <h1 className="text-xs font-bold uppercase tracking-widest text-emerald-500">
-          DW / FITNESS
-        </h1>
-        <p className="text-xl font-extrabold tracking-tight">Member Profile</p>
-      </header>
+    <main className="min-h-screen bg-slate-950 text-white pb-24 p-4 max-w-md mx-auto flex flex-col justify-center">
+      <h1 className="text-2xl font-bold tracking-tight mb-6 text-emerald-400 text-center">
+        User Profile
+      </h1>
 
-      {/* User Info Card */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-6 flex items-center gap-4">
-        <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full flex items-center justify-center font-black text-lg">
-          <User className="w-6 h-6" />
+      {user ? (
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center space-y-4 shadow-lg">
+          <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+            {user.email?.[0].toUpperCase()}
+          </div>
+          <div>
+            <p className="text-xs text-slate-400">Logged in as:</p>
+            <p className="text-sm font-semibold text-slate-200">{user.email}</p>
+          </div>
+          <button
+            onClick={handleSignOut}
+            className="w-full bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 font-semibold py-2 rounded-lg text-sm transition-colors"
+          >
+            Sign Out
+          </button>
         </div>
-        <div>
-          <h2 className="text-base font-extrabold text-white">Cleverton</h2>
-          <div className="flex items-center gap-1 text-[11px] text-emerald-400 font-semibold mt-0.5">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Active Member</span>
+      ) : (
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
+          <h2 className="text-lg font-semibold text-slate-200 mb-1 text-center">
+            {isSignUp ? 'Create an Account' : 'Welcome Back'}
+          </h2>
+          <p className="text-xs text-slate-400 text-center mb-6">
+            {isSignUp ? 'Sign up to track your workout routines' : 'Log in to manage your workouts'}
+          </p>
+
+          <form onSubmit={handleAuth} className="space-y-4">
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Email</label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                required
+              />
+            </div>
+
+            {message && (
+              <p className={`text-xs p-2 rounded text-center ${message.startsWith('Error') ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                {message}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold py-2.5 rounded-lg text-sm transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Log In'}
+            </button>
+          </form>
+
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => {
+                setIsSignUp(!isSignUp)
+                setMessage('')
+              }}
+              className="text-xs text-slate-400 hover:text-emerald-400 underline transition-colors"
+            >
+              {isSignUp ? 'Already have an account? Log In' : "Don't have an account? Sign Up"}
+            </button>
           </div>
         </div>
-      </div>
-
-      {/* Equipment Selector */}
-      <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-6">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200 mb-1">
-          Available Equipment
-        </h3>
-        <p className="text-[11px] text-zinc-400 mb-4">
-          Select equipment you own to personalize your workout block filters.
-        </p>
-
-        <div className="grid grid-cols-2 gap-2">
-          {availableEquip.map((item) => {
-            const hasGear = equipment.includes(item);
-            return (
-              <button
-                key={item}
-                onClick={() => toggleGear(item)}
-                className={`py-2 px-3 rounded-xl text-xs font-bold border text-left flex items-center justify-between transition-all ${
-                  hasGear
-                    ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400'
-                    : 'bg-zinc-950 border-zinc-800 text-zinc-500'
-                }`}
-              >
-                <span>{item}</span>
-                {hasGear && <Check className="w-3.5 h-3.5 text-emerald-400" />}
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Preferences */}
-      <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200 mb-3">
-          App Settings
-        </h3>
-        <div className="flex items-center justify-between text-xs text-zinc-400 border-b border-zinc-800/80 pb-3 mb-3">
-          <span className="flex items-center gap-2">
-            <Globe className="w-4 h-4 text-emerald-400" /> Timezone
-          </span>
-          <span className="font-mono text-zinc-200">WAT (Africa/Lagos)</span>
-        </div>
-      </section>
+      )}
 
       <Navigation />
     </main>
-  );
+  )
 }
