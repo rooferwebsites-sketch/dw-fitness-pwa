@@ -1,0 +1,7 @@
+{
+  "name": "DW / FITNESS",
+  "description": "Invite-only training for Derrick Washington Fitness.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
