@@ -13,7 +13,7 @@ export default function Home() {
           <h1 className="text-xs font-bold uppercase tracking-widest text-emerald-500">
             DW / FITNESS
           </h1>
-          <p className="text-xl font-extrabold tracking-tight">Today's Focus</p>
+          <p className="text-xl font-extrabold tracking-tight">Today&apos;s Focus</p>
         </div>
         <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-full">
           <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
